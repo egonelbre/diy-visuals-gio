@@ -19,7 +19,7 @@ func main() {
 		var alpha float32
 		for x := 0; x < screenSize.X; x += 10 {
 			paint.FillShape(gtx.Ops,
-				g.HSL(g.Mod(alpha, 1), 0.7, 0.5),
+				g.HSL(alpha, 0.7, 0.5),
 				g.FillRect(gtx.Ops, float32(x), 100, 10, 50))
 			alpha += 0.03
 		}
@@ -27,7 +27,7 @@ func main() {
 		var beta float32
 		for x := 0; x < screenSize.X; x += 10 {
 			paint.FillShape(gtx.Ops,
-				g.RGB(g.Mod(beta, 1), 0.2, 0.2),
+				g.RGB(beta, 0.2, 0.2),
 				g.FillRect(gtx.Ops, float32(x), 200, 10, 50))
 			beta += 0.03
 		}
