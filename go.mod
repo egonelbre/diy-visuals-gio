@@ -1,6 +1,6 @@
 module github.com/egonelbre/diy-visuals-gio
 
-go 1.21.3
+go 1.20
 
 require gioui.org v0.3.1
 
