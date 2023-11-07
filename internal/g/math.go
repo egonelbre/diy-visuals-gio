@@ -4,6 +4,8 @@ package g
 
 import (
 	"math"
+
+	"gioui.org/f32"
 )
 
 // Sat8 converts 0..1 float to 0..255 uint8
@@ -17,6 +19,10 @@ func Sat8(v float32) uint8 {
 	return uint8(v)
 }
 
+func Lerp(p, min, max float32) float32 {
+	return min + (max-min)*p
+}
+
 func LerpClamp(p, min, max float32) float32 {
 	if p < 0 {
 		return min
@@ -24,6 +30,20 @@ func LerpClamp(p, min, max float32) float32 {
 		return max
 	}
 	return min + (max-min)*p
+}
+
+func PtLerp(p float32, a, b f32.Point) f32.Point {
+	return f32.Point{
+		X: Lerp(p, a.X, b.X),
+		Y: Lerp(p, a.Y, b.Y),
+	}
+}
+
+func PtLerpClamp(p float32, a, b f32.Point) f32.Point {
+	return f32.Point{
+		X: LerpClamp(p, a.X, b.X),
+		Y: LerpClamp(p, a.Y, b.Y),
+	}
 }
 
 func Mod(x, y float32) float32 { return float32(math.Mod(float64(x), float64(y))) }
@@ -39,4 +59,12 @@ func Cos(v float32) float32 {
 func Sincos(v float32) (sn, cs float32) {
 	s, c := math.Sincos(float64(v))
 	return float32(s), float32(c)
+}
+
+func Sqrt(v float32) float32 {
+	return float32(math.Sqrt(float64(v)))
+}
+
+func Len(p f32.Point) float32 {
+	return Sqrt(p.X*p.X + p.Y*p.Y)
 }
