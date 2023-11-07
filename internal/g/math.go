@@ -23,6 +23,15 @@ func Lerp(p, min, max float32) float32 {
 	return min + (max-min)*p
 }
 
+func Clamp(p, min, max float32) float32 {
+	if p < 0 {
+		return min
+	} else if p > 1 {
+		return max
+	}
+	return p
+}
+
 func LerpClamp(p, min, max float32) float32 {
 	if p < 0 {
 		return min
@@ -67,4 +76,9 @@ func Sqrt(v float32) float32 {
 
 func Len(p f32.Point) float32 {
 	return Sqrt(p.X*p.X + p.Y*p.Y)
+}
+
+func Map(v, min, max, toMin, toMax float32) float32 {
+	p := (v - min) / (max - min)
+	return p*(toMax-toMin) + toMin
 }

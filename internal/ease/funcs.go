@@ -15,18 +15,18 @@ type Func struct {
 
 var Funcs = []Func{
 	Func{Name: "Linear", Ease: Linear},
-	Func{Name: "EaseInQuad", Ease: EaseInQuad},
-	Func{Name: "EaseOutQuad", Ease: EaseOutQuad},
-	Func{Name: "EaseInOutQuad", Ease: EaseInOutQuad},
-	Func{Name: "EaseInCubic", Ease: EaseInCubic},
-	Func{Name: "EaseOutCubic", Ease: EaseOutCubic},
-	Func{Name: "EaseInOutCubic", Ease: EaseInOutCubic},
-	Func{Name: "EaseInQuart", Ease: EaseInQuart},
-	Func{Name: "EaseOutQuart", Ease: EaseOutQuart},
-	Func{Name: "EaseInOutQuart", Ease: EaseInOutQuart},
-	Func{Name: "EaseInQuint", Ease: EaseInQuint},
-	Func{Name: "EaseOutQuint", Ease: EaseOutQuint},
-	Func{Name: "EaseInOutQuint", Ease: EaseInOutQuint},
+	Func{Name: "InQuad", Ease: InQuad},
+	Func{Name: "OutQuad", Ease: OutQuad},
+	Func{Name: "InOutQuad", Ease: InOutQuad},
+	Func{Name: "InCubic", Ease: InCubic},
+	Func{Name: "OutCubic", Ease: OutCubic},
+	Func{Name: "InOutCubic", Ease: InOutCubic},
+	Func{Name: "InQuart", Ease: InQuart},
+	Func{Name: "OutQuart", Ease: OutQuart},
+	Func{Name: "InOutQuart", Ease: InOutQuart},
+	Func{Name: "InQuint", Ease: InQuint},
+	Func{Name: "OutQuint", Ease: OutQuint},
+	Func{Name: "InOutQuint", Ease: InOutQuint},
 	Func{Name: "Logarithm", Ease: Logarithm},
 	Func{Name: "Sin", Ease: Sin},
 	Func{Name: "Sqr", Ease: Sqr},
@@ -42,17 +42,17 @@ func Linear(t float32) float32 {
 }
 
 // accelerating from zero velocity
-func EaseInQuad(t float32) float32 {
+func InQuad(t float32) float32 {
 	return t * t
 }
 
 // decelerating to zero velocity
-func EaseOutQuad(t float32) float32 {
+func OutQuad(t float32) float32 {
 	return t * (2 - t)
 }
 
 // acceleration until halfway, then deceleration
-func EaseInOutQuad(t float32) float32 {
+func InOutQuad(t float32) float32 {
 	if t < .5 {
 		return 2 * t * t
 	}
@@ -60,18 +60,18 @@ func EaseInOutQuad(t float32) float32 {
 }
 
 // accelerating from zero velocity
-func EaseInCubic(t float32) float32 {
+func InCubic(t float32) float32 {
 	return t * t * t
 }
 
 // decelerating to zero velocity
-func EaseOutCubic(t float32) float32 {
+func OutCubic(t float32) float32 {
 	t--
 	return t*t*t + 1
 }
 
 // acceleration until halfway, then deceleration
-func EaseInOutCubic(t float32) float32 {
+func InOutCubic(t float32) float32 {
 	if t < .5 {
 		return 4 * t * t * t
 	}
@@ -79,18 +79,18 @@ func EaseInOutCubic(t float32) float32 {
 }
 
 // accelerating from zero velocity
-func EaseInQuart(t float32) float32 {
+func InQuart(t float32) float32 {
 	return t * t * t * t
 }
 
 // decelerating to zero velocity
-func EaseOutQuart(t float32) float32 {
+func OutQuart(t float32) float32 {
 	t--
 	return 1 - t*t*t*t
 }
 
 // acceleration until halfway, then deceleration
-func EaseInOutQuart(t float32) float32 {
+func InOutQuart(t float32) float32 {
 	if t < .5 {
 		return 8 * t * t * t * t
 	}
@@ -99,18 +99,18 @@ func EaseInOutQuart(t float32) float32 {
 }
 
 // accelerating from zero velocity
-func EaseInQuint(t float32) float32 {
+func InQuint(t float32) float32 {
 	return t * t * t * t * t
 }
 
 // decelerating to zero velocity
-func EaseOutQuint(t float32) float32 {
+func OutQuint(t float32) float32 {
 	t--
 	return 1 + t*t*t*t*t
 }
 
 // acceleration until halfway, then deceleration
-func EaseInOutQuint(t float32) float32 {
+func InOutQuint(t float32) float32 {
 	if t < .5 {
 		return 16 * t * t * t * t * t
 	}
