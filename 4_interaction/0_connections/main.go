@@ -9,6 +9,7 @@ import (
 	"gioui.org/f32"
 	"gioui.org/layout"
 	"gioui.org/op"
+	"gioui.org/op/clip"
 	"gioui.org/op/paint"
 	"gioui.org/widget/material"
 
@@ -23,11 +24,13 @@ var Last time.Time
 var Critters []*Critter
 
 func main() {
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 10; i++ {
 		Critters = append(Critters, NewCritter())
 	}
 
 	qapp.Layout(func(gtx layout.Context) layout.Dimensions {
+		paint.Fill(gtx.Ops, g.Black)
+
 		screenSize := layout.FPt(gtx.Constraints.Max)
 		op.InvalidateOp{}.Add(gtx.Ops)
 
@@ -43,12 +46,38 @@ func main() {
 			c.Draw(gtx, screenSize)
 		}
 
+		// lines between critters
+		maxDistance := screenSize.Y * 0.6
+
+		for i, a := range Critters {
+			for _, b := range Critters[i+1:] {
+
+				distance := g.Len(b.At.Sub(a.At))
+				if distance > maxDistance {
+					continue
+				}
+
+				strength := 1 - distance/maxDistance
+
+				var path clip.Path
+				path.Begin(gtx.Ops)
+				path.MoveTo(a.At)
+				path.LineTo(b.At)
+				paint.FillShape(gtx.Ops, g.HSLA(0, 0, 1, strength),
+					clip.Stroke{
+						Width: 2 + strength*2,
+						Path:  path.End(),
+					}.Op())
+			}
+		}
+
 		return layout.Dimensions{}
 	})
 }
 
 type Critter struct {
 	Start f32.Point
+	At    f32.Point
 	Food  f32.Point
 
 	Animation float32
@@ -109,18 +138,19 @@ func (c *Critter) Draw(gtx layout.Context, screenSize f32.Point) {
 	switch c.State {
 	case Moving:
 		t := ease.InOutQuad(c.Animation)
-		at := g.PtLerp(t, start, food)
+		c.At = g.PtLerp(t, start, food)
 		paint.FillShape(gtx.Ops,
-			g.HSLA(c.Hue, 0.7, 0.3, 0.95),
-			g.FillCircle(gtx.Ops, at, 20))
+			g.HSLA(c.Hue, 0.7, 0.3, 0.99),
+			g.FillCircle(gtx.Ops, c.At, 20))
 	case Eating:
 		t := g.Sin(c.Animation * math.Pi * 8)
+		c.At = food
 		paint.FillShape(gtx.Ops,
-			g.HSLA(c.Hue, 0.7, 0.3, 0.95),
-			g.FillCircle(gtx.Ops, food, 20+t*5))
+			g.HSLA(c.Hue, 0.7, 0.4, 0.99),
+			g.FillCircle(gtx.Ops, c.At, 20+t*5))
 	}
 
 	paint.FillShape(gtx.Ops,
-		g.HSLA(0, 0.8, 0.6, 0.95),
+		g.HSLA(0, 0.8, 0.6, 0.99),
 		g.FillCircle(gtx.Ops, food, 10))
 }
