@@ -78,7 +78,37 @@ func Len(p f32.Point) float32 {
 	return Sqrt(p.X*p.X + p.Y*p.Y)
 }
 
+func Unit(p f32.Point) f32.Point {
+	return p.Div(Len(p))
+}
+
+func Dot(a, b f32.Point) float32 {
+	return a.X*b.X + a.Y*b.Y
+}
+
+func Normal(a f32.Point) f32.Point {
+	return Unit(f32.Pt(-a.Y, a.X))
+}
+
 func Map(v, min, max, toMin, toMax float32) float32 {
 	p := (v - min) / (max - min)
 	return p*(toMax-toMin) + toMin
+}
+
+func Sign(v float32) float32 {
+	switch {
+	case v < 0:
+		return -1
+	case v > 0:
+		return 1
+	default:
+		return 0
+	}
+}
+
+func Abs(v float32) float32 {
+	if v < 0 {
+		return -v
+	}
+	return v
 }

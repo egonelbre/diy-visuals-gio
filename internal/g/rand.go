@@ -16,6 +16,10 @@ func RandPt() f32.Point {
 	return f32.Pt(Rand(), Rand())
 }
 
+func RandUnitPt() f32.Point {
+	return f32.Pt(Rand()-0.5, Rand()-0.5).Mul(2)
+}
+
 func RandRange(min, max float32) float32 {
 	return Rand()*(max-min) + min
 }
