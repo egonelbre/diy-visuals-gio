@@ -14,9 +14,9 @@ import (
 )
 
 // Layout is a utility to start a layouting gio app.
-func Layout(lay func(gtx layout.Context) layout.Dimensions) {
+func Layout(lay func(gtx layout.Context) layout.Dimensions, opts ...app.Option) {
 	go func() {
-		w := app.NewWindow()
+		w := app.NewWindow(opts...)
 		// ops will be used to encode different operations.
 		var ops op.Ops
 

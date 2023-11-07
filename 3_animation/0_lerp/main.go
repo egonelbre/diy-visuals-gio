@@ -62,9 +62,9 @@ func main() {
 		}
 		deltaMillis := float32(gtx.Now.Sub(LastTime).Seconds() * 1000)
 		log.Printf("dt: %v", deltaMillis)
-		millis := float32(gtx.Now.Sub(Start).Seconds())
-		log.Printf(" t: %v", millis)
-		log.Printf(".t: %v", g.Mod(millis, 1))
+		secs := float32(gtx.Now.Sub(Start).Seconds())
+		log.Printf(" t: %v", secs)
+		log.Printf(".t: %v", g.Mod(secs, 1))
 
 		LastTime = gtx.Now
 
@@ -79,7 +79,7 @@ func main() {
 			g.Black,
 			g.FillCircle(gtx.Ops, start, ballRadius),
 		)
-		middle := g.PtLerp(g.Mod(millis, 1), start, Mouse)
+		middle := g.PtLerp(g.Mod(secs, 1), start, Mouse)
 		paint.FillShape(gtx.Ops,
 			g.Blue,
 			g.FillCircle(gtx.Ops, middle, ballRadius),
