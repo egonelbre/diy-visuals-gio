@@ -4,6 +4,7 @@ package main
 
 import (
 	"image"
+	"slices"
 	"time"
 
 	"gioui.org/app"
@@ -20,7 +21,6 @@ import (
 var Theme = material.NewTheme()
 var Start time.Time
 var Update float32
-var LastTime time.Time
 
 func main() {
 	grid := NewGrid(25, 25)
@@ -30,19 +30,17 @@ func main() {
 		paint.Fill(gtx.Ops, g.Black)
 		op.InvalidateOp{}.Add(gtx.Ops)
 
-		if LastTime.IsZero() {
+		if Start.IsZero() {
 			Start = gtx.Now
-			LastTime = gtx.Now
 		}
-		deltaTime := float32(gtx.Now.Sub(LastTime).Seconds())
-		LastTime = gtx.Now
+		now := float32(gtx.Now.Sub(Start).Seconds())
 
-		Update -= deltaTime
-		if Update < 0 {
-			grid.Update()
-			Update = 0.1
-		}
-
+		dx := g.Sin(now*10) * 3
+		grid.AddHeat(
+			float32(grid.Max.X)/2+dx,
+			float32(grid.Max.Y)-2,
+			5)
+		grid.Update()
 		grid.Layout(gtx)
 
 		return layout.Dimensions{}
@@ -61,18 +59,19 @@ func NewGrid(width, height int) *Grid {
 	}
 }
 
+func (grid *Grid) Clone() *Grid {
+	return &Grid{
+		Cells: slices.Clone(grid.Cells),
+		Max:   grid.Max,
+	}
+}
+
 func (grid *Grid) At(x, y int) *Cell {
-	for x < 0 {
-		x += grid.Max.X
+	if x < 0 || x >= grid.Max.X {
+		return nil
 	}
-	for x >= grid.Max.X {
-		x -= grid.Max.X
-	}
-	for y < 0 {
-		y += grid.Max.X
-	}
-	for y >= grid.Max.Y {
-		y -= grid.Max.Y
+	if y < 0 || y >= grid.Max.X {
+		return nil
 	}
 	return &grid.Cells[grid.Offset(x, y)]
 }
@@ -90,44 +89,35 @@ func (grid *Grid) Offset(x, y int) int {
 func (grid *Grid) Randomize() {
 	for i := range grid.Cells {
 		cell := &grid.Cells[i]
-		cell.Alive = g.Rand() > 0.5
+		cell.Randomize()
 	}
 }
 
+func (grid *Grid) AddHeat(x, y float32, amount float32) {
+	lowX := g.Round(x)
+	lx := int(lowX)
+	lowY := g.Round(y)
+	ly := int(lowY)
+
+	dx := int(g.Sign(x - lowX))
+	dy := int(g.Sign(y - lowY))
+
+	contribLowX := 1 - g.Abs(x-lowX)
+	contribLowY := 1 - g.Abs(y-lowY)
+
+	grid.At(lx, ly).Add(amount * contribLowX * contribLowY)
+	grid.At(lx+dx, ly).Add(amount * (1 - contribLowX) * contribLowY)
+	grid.At(lx, ly+dy).Add(amount * contribLowX * (1 - contribLowY))
+	grid.At(lx+dx, ly+dy).Add(amount * (1 - contribLowX) * (1 - contribLowY))
+}
+
 func (grid *Grid) Update() {
+	snap := grid.Clone()
+
 	for i := range grid.Cells {
 		cell := &grid.Cells[i]
 		x, y := grid.IndexToPos(i)
-		cell.NextAlive = cell.Alive
-
-		aliveCount := 0
-		for dy := -1; dy <= 1; dy++ {
-			for dx := -1; dx <= 1; dx++ {
-				if dx == 0 && dy == 0 {
-					continue
-				}
-				cell := grid.At(x+dx, y+dy)
-				if cell.IsAlive() {
-					aliveCount++
-				}
-			}
-		}
-
-		switch {
-		case aliveCount < 2:
-			// under population
-			cell.NextAlive = false
-		case aliveCount > 3:
-			// over population
-			cell.NextAlive = false
-		case aliveCount == 3 && !cell.Alive:
-			// reproduction
-			cell.NextAlive = true
-		}
-	}
-
-	for i := range grid.Cells {
-		grid.Cells[i].Alive = grid.Cells[i].NextAlive
+		cell.Update(image.Pt(x, y), snap)
 	}
 }
 
@@ -161,20 +151,44 @@ func (grid *Grid) Layout(gtx layout.Context) layout.Dimensions {
 }
 
 type Cell struct {
-	Alive     bool
-	NextAlive bool
+	Temp float32
+	Dead bool
 }
 
-func (cell *Cell) IsAlive() bool {
-	if cell == nil {
-		return false
+func (cell *Cell) Randomize() {
+	cell.Temp = g.Rand()
+	cell.Temp *= cell.Temp
+	cell.Temp *= cell.Temp
+	cell.Temp *= cell.Temp
+}
+
+func (cell *Cell) Add(heat float32) {
+	if cell == nil || cell.Dead {
+		return
 	}
-	return cell.Alive
+	cell.Temp += heat
+}
+
+func (cell *Cell) Heat() float32 {
+	if cell == nil {
+		return 0
+	}
+	return cell.Temp
+}
+
+func (cell *Cell) Update(at image.Point, lastGrid *Grid) {
+	t := float32(0)
+	t += lastGrid.At(at.X-1, at.Y+1).Heat()
+	t += lastGrid.At(at.X, at.Y+1).Heat()
+	t += lastGrid.At(at.X+1, at.Y+1).Heat()
+	t += lastGrid.At(at.X, at.Y+2).Heat()
+	cell.Temp = t / 4.1
 }
 
 func (cell *Cell) Draw(gtx layout.Context, at image.Rectangle, cellSize int) {
-	if cell.Alive {
-		center := at.Inset(cellSize / 5)
-		paint.FillShape(gtx.Ops, g.White, clip.Rect(center).Op())
-	}
+	center := at.Inset(cellSize / 5)
+	red := cell.Temp
+	green := cell.Temp * cell.Temp
+	color := g.RGB(red, green, 0)
+	paint.FillShape(gtx.Ops, color, clip.Rect(center).Op())
 }

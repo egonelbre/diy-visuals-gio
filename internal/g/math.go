@@ -112,3 +112,7 @@ func Abs(v float32) float32 {
 	}
 	return v
 }
+
+func Round(v float32) float32 {
+	return float32(math.Round(float64(v)))
+}

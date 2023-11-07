@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"gioui.org/app"
-	"gioui.org/f32"
-	"gioui.org/io/pointer"
 	"gioui.org/layout"
 	"gioui.org/op"
 	"gioui.org/op/clip"
@@ -23,7 +21,6 @@ var Theme = material.NewTheme()
 var Start time.Time
 var Update float32
 var LastTime time.Time
-var Mouse f32.Point
 
 func main() {
 	grid := NewGrid(20, 20)
@@ -31,17 +28,6 @@ func main() {
 	qapp.Layout(func(gtx layout.Context) layout.Dimensions {
 		paint.Fill(gtx.Ops, g.Black)
 		op.InvalidateOp{}.Add(gtx.Ops)
-
-		pointer.InputOp{
-			Tag:   &Mouse,
-			Types: pointer.Press | pointer.Drag | pointer.Release | pointer.Move,
-		}.Add(gtx.Ops)
-		for _, ev := range gtx.Events(&Mouse) {
-			switch ev := ev.(type) {
-			case pointer.Event:
-				Mouse = ev.Position
-			}
-		}
 
 		if LastTime.IsZero() {
 			Start = gtx.Now

@@ -13,9 +13,6 @@ var Theme = material.NewTheme()
 
 func main() {
 	qapp.Layout(func(gtx layout.Context) layout.Dimensions {
-		screenSize := gtx.Constraints.Max
-		screenWidth, screenHeight := float32(screenSize.X), float32(screenSize.Y)
-		_, _ = screenWidth, screenHeight
 
 		/*
 
