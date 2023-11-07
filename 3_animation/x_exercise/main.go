@@ -18,19 +18,15 @@ func main() {
 		_, _ = screenWidth, screenHeight
 
 		/*
+
 			Continue your house drawing exercise.
 
 			Here are a few ideas on what to do:
 
-			- add a fence by using translate and drawing the same shape multiple times
-			- change the trees to use the recursive approach
-			   - create multiple trees with variations
-			   - remember to keep them slightly animated
-			   - you can add leaves at end of branches to make it nicer
-			- make the cat or dog look at the direction of the mouse
-			- add perspective by translating things based on mouse position
-			   - things in the background should move slower
-			   - than things in the foreground
+			- animate a door, window or a fence opening and closing
+			- add a bird / cat that picks a random spot and then moves there
+			  using some easing curve
+
 		*/
 
 		return layout.Dimensions{}
