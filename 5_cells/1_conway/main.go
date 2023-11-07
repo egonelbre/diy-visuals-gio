@@ -26,7 +26,8 @@ var LastTime time.Time
 var Mouse f32.Point
 
 func main() {
-	grid := NewGrid(20, 20)
+	grid := NewGrid(25, 25)
+	grid.Randomize()
 
 	qapp.Layout(func(gtx layout.Context) layout.Dimensions {
 		paint.Fill(gtx.Ops, g.Black)
@@ -52,8 +53,8 @@ func main() {
 
 		Update -= deltaTime
 		if Update < 0 {
-			grid.Randomize()
-			Update = 1
+			grid.Update()
+			Update = 0.1
 		}
 
 		grid.Layout(gtx)
@@ -75,13 +76,25 @@ func NewGrid(width, height int) *Grid {
 }
 
 func (grid *Grid) At(x, y int) *Cell {
-	if x < 0 || x >= grid.Max.X {
-		return nil
+	for x < 0 {
+		x += grid.Max.X
 	}
-	if y < 0 || y >= grid.Max.X {
-		return nil
+	for x >= grid.Max.X {
+		x -= grid.Max.X
+	}
+	for y < 0 {
+		y += grid.Max.X
+	}
+	for y >= grid.Max.Y {
+		y -= grid.Max.Y
 	}
 	return &grid.Cells[grid.Offset(x, y)]
+}
+
+func (grid *Grid) IndexToPos(i int) (int, int) {
+	x := i % grid.Max.X
+	y := i / grid.Max.X
+	return x, y
 }
 
 func (grid *Grid) Offset(x, y int) int {
@@ -92,6 +105,43 @@ func (grid *Grid) Randomize() {
 	for i := range grid.Cells {
 		cell := &grid.Cells[i]
 		cell.Alive = g.Rand() > 0.5
+	}
+}
+
+func (grid *Grid) Update() {
+	for i := range grid.Cells {
+		cell := &grid.Cells[i]
+		x, y := grid.IndexToPos(i)
+		cell.NextAlive = cell.Alive
+
+		aliveCount := 0
+		for dy := -1; dy <= 1; dy++ {
+			for dx := -1; dx <= 1; dx++ {
+				if dx == 0 && dy == 0 {
+					continue
+				}
+				cell := grid.At(x+dx, y+dy)
+				if cell.IsAlive() {
+					aliveCount++
+				}
+			}
+		}
+
+		switch {
+		case aliveCount < 2:
+			// under population
+			cell.NextAlive = false
+		case aliveCount > 3:
+			// over population
+			cell.NextAlive = false
+		case aliveCount == 3 && !cell.Alive:
+			// reproduction
+			cell.NextAlive = true
+		}
+	}
+
+	for i := range grid.Cells {
+		grid.Cells[i].Alive = grid.Cells[i].NextAlive
 	}
 }
 
@@ -112,8 +162,7 @@ func (grid *Grid) Layout(gtx layout.Context) layout.Dimensions {
 
 			for i := range grid.Cells {
 				cell := &grid.Cells[i]
-				x := i % grid.Max.X
-				y := i / grid.Max.X
+				x, y := grid.IndexToPos(i)
 
 				cell.Draw(gtx, image.Rectangle{
 					Min: image.Pt(x*cellSize, y*cellSize),
@@ -126,7 +175,8 @@ func (grid *Grid) Layout(gtx layout.Context) layout.Dimensions {
 }
 
 type Cell struct {
-	Alive bool
+	Alive     bool
+	NextAlive bool
 }
 
 func (cell *Cell) IsAlive() bool {
